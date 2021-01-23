@@ -1,7 +1,7 @@
 #include "mysystem.h"
 #include <QPainter>
 #include <QPainterPath>
-#include<QDebug>
+#include <QDebug>
 #include <QTimer>
 #include <stdlib.h>
 #include <time.h>
@@ -38,36 +38,52 @@ void mysystem::initSystem(){
     // creaturelist.push_back(a2);
     // testcreature *a3 =new testcreature(Qt::green,400,300);
     // creaturelist.push_back(a3);
-    const int numGrass = 1000, numGroupCow = 10, numCowPerG = 10, numTiger = 10;
+    const int numGrass = 100, numGroupCow = 10, numCowPerG = 10, numTiger = 10;
     const double energyGrass = 1e2, energyCow = 1e3, energyTiger = 1e4;
     srand(0);
     for (int i = 0; i < numGrass; ++i)
-        grasslist.push_back(new Grass(0.0, energyGrass, 0,   // 构造函数还有很多要改
+        grasslist.push_back(new Grass(0.0, energyGrass,   // 构造函数还有很多要改
                             rand()/double(RAND_MAX)*this->width(),
-                            rand()/double(RAND_MAX)*this->height()));
+                            rand()/double(RAND_MAX)*this->height(),0,0));
     for (int i = 0; i < numGroupCow; ++i) {                  // Cow群落生成
         double centerx = rand()/double(RAND_MAX)*this->width(),
                 centery = rand()/double(RAND_MAX)*this->height();
         const double limx = 10, limy = 10;
         for (int j = 0; j < numCowPerG; ++j)
-            cowlist.push_back(new Cow(rand()/double(RAND_MAX)*limx-limx/2+centerx,
-                                rand()/double(RAND_MAX)*limy-limy/2+centery));
+            cowlist.push_back(new Cow(0,0,rand()/double(RAND_MAX)*limx-limx/2+centerx,
+                                rand()/double(RAND_MAX)*limy-limy/2+centery,0,0));
     }
     for (int i = 0; i < numTiger; ++i)
-        tigerlist.push_back(new Tiger(rand()/double(RAND_MAX)*this->width(),
-                            rand()/double(RAND_MAX)*this->height()));
+        tigerlist.push_back(new Tiger(0,0,rand()/double(RAND_MAX)*this->width(),
+                                      rand()/double(RAND_MAX)*this->height(),0,0));
 }
 
 void mysystem::drawsystem(QPainter *painter){
-    for(testcreature* iter:creaturelist){
+    for(Grass* iter:grasslist){
         painter->setBrush(iter->getcolor());
-       // qDebug()<<iter->getcolor();
-      //  qDebug()<<iter->getx()<<iter->gety();
-        painter->drawEllipse(QPointF(iter->getx(),iter->gety()),10,10);
-
+        painter->drawEllipse(QPointF(iter->displayx(),iter->displayy()),5,5);
+    }
+    for(Cow* iter:cowlist){
+        painter->setBrush(iter->getcolor());
+        painter->drawEllipse(QPointF(iter->displayx(),iter->displayy()),5,5);
+    }
+    for(Tiger* iter:tigerlist){
+        painter->setBrush(iter->getcolor());
+        painter->drawEllipse(QPointF(iter->displayx(),iter->displayy()),5,5);
     }
 }
 
 void mysystem::updatesystem(){
-
+    for(Cow* iter:cowlist){
+        if (rand() % 2==1)
+        iter->setcoordinate(iter->displayx()+rand()/double(RAND_MAX)*this->width()/100,iter->displayy()+rand()/double(RAND_MAX)*this->width()/100);
+        else
+            iter->setcoordinate(iter->displayx()-rand()/double(RAND_MAX)*this->width()/100,iter->displayy()-rand()/double(RAND_MAX)*this->width()/100);
+    }
+    for(Tiger* iter:tigerlist){
+        if (rand() % 2==1)
+        iter->setcoordinate(iter->displayx()+rand()/double(RAND_MAX)*this->width()/100,iter->displayy()+rand()/double(RAND_MAX)*this->width()/100);
+        else
+            iter->setcoordinate(iter->displayx()-rand()/double(RAND_MAX)*this->width()/100,iter->displayy()-rand()/double(RAND_MAX)*this->width()/100);
+    }
 }
