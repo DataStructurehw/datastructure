@@ -87,3 +87,60 @@ void mysystem::updatesystem(){
             iter->setcoordinate(iter->displayx()-rand()/double(RAND_MAX)*this->width()/100,iter->displayy()-rand()/double(RAND_MAX)*this->width()/100);
     }
 }
+
+// hunting proccess
+
+#include <queue>
+#include <set>
+#include <cmath>
+
+struct Node { // Tiger A will hunt cow B
+    Tiger* A;
+    Cow* B;
+    double dis;
+    Node(Tiger* A=NULL, Cow* B=NULL, double dis=0): A(A), B(B) {}
+    bool operator<(const Node &op) const {
+        return dis > op.dis;
+    }
+};
+
+std::priority_queue<Node> que;
+std::set<Tiger*> matchedt;
+std::set<Cow*> matchedc;
+QList<Node> huntlist;
+
+// help function
+double mysystem::dist(Tiger* A, Cow* B) {
+    double x = A->displayx()-B->displayx(),
+            y = A->displayy()-B->displayy();
+    return std::sqrt(x*x+y*y);
+}
+
+void mysystem::match() {
+    // initialize
+    while (!que.empty()) que.pop();
+    matchedt.clear(); matchedc.clear();
+    huntlist.clear();
+    // find out hungry tigers and match the cows
+    for (Tiger* it: tigerlist)
+        if (it->ishungry()) {
+            for (Cow* itcow: cowlist)
+                que.push(Node(it, itcow, dist(it, itcow));
+        }
+    while (!que.empty()) {
+        Node tmp = que.top(); que.pop();
+        if (!matchedc.count(tmp.B) && ! matchedt.count(tmp.A)) {
+            huntlist.push_back(tmp);
+            matchedc.insert(tmp.A);
+            matchedt.insert(tmp.B);
+        }
+    }
+}
+
+void mysystem::hunt() {
+
+}
+
+void mysystem::escape() {
+    
+}
