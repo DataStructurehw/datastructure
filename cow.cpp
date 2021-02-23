@@ -24,7 +24,7 @@ double Cow::displayy() { return coordinatey; }
 QColor Cow::getcolor(){
     return owncolor;
 }
-double Tiger::getprobability(){
+double Cow::getprobability(){
 	return probability; 
 } 
 void Cow::setcoordinate(double x, double y){
