@@ -50,11 +50,11 @@ void mysystem::initSystem(){
                 centery = rand()/double(RAND_MAX)*this->height();
         const double limx = 10, limy = 10;
         for (int j = 0; j < numCowPerG; ++j)
-            cowlist.push_back(new Cow(0,0,rand()/double(RAND_MAX)*limx-limx/2+centerx,
+            cowlist.push_back(new Cow(0, energyCow,rand()/double(RAND_MAX)*limx-limx/2+centerx,
                                 rand()/double(RAND_MAX)*limy-limy/2+centery,0,0));
     }
     for (int i = 0; i < numTiger; ++i)
-        tigerlist.push_back(new Tiger(0,0,rand()/double(RAND_MAX)*this->width(),
+        tigerlist.push_back(new Tiger(0,energyTiger,rand()/double(RAND_MAX)*this->width(),
                                       rand()/double(RAND_MAX)*this->height(),0,0));
 }
 
@@ -75,72 +75,41 @@ void mysystem::drawsystem(QPainter *painter){
 
 void mysystem::updatesystem(){
     for(Cow* iter:cowlist){
-        if (rand() % 2==1)
-        iter->setcoordinate(iter->displayx()+rand()/double(RAND_MAX)*this->width()/100,iter->displayy()+rand()/double(RAND_MAX)*this->width()/100);
-        else
-            iter->setcoordinate(iter->displayx()-rand()/double(RAND_MAX)*this->width()/100,iter->displayy()-rand()/double(RAND_MAX)*this->width()/100);
+        if(iter->faith()){//如果death值为true，则执行，表示生物已死亡
+                if(iter->getenergy()<=0)//如果能量小于等于0，则尸体消失，删除该生物
+                    cowlist.removeOne(iter);
+                else
+                iter->energyloss(20);//尸体能量损失
+            }
+        else if (!iter->survival()){//如果能量小于0，则survival值为false，执行，表示生物在当前帧死亡
+                iter->die();//赋予死亡状态
+        }
+        else if (rand() % 2==1){//用初版代码中的位移来代替不同行为，同时有不同的energyloss
+                iter->setcoordinate(iter->displayx()+rand()/double(RAND_MAX)*this->width()/100,iter->displayy()+rand()/double(RAND_MAX)*this->width()/100);
+                iter->energyloss(10);
+        }
+        else  {
+                iter->setcoordinate(iter->displayx()-rand()/double(RAND_MAX)*this->width()/100,iter->displayy()-rand()/double(RAND_MAX)*this->width()/100);
+                iter->energyloss(5);
+        }
     }
     for(Tiger* iter:tigerlist){
-        if (rand() % 2==1)
-        iter->setcoordinate(iter->displayx()+rand()/double(RAND_MAX)*this->width()/100,iter->displayy()+rand()/double(RAND_MAX)*this->width()/100);
-        else
-            iter->setcoordinate(iter->displayx()-rand()/double(RAND_MAX)*this->width()/100,iter->displayy()-rand()/double(RAND_MAX)*this->width()/100);
-    }
-}
-
-// hunting proccess
-
-#include <queue>
-#include <set>
-#include <cmath>
-
-struct Node { // Tiger A will hunt cow B
-    Tiger* A;
-    Cow* B;
-    double dis;
-    Node(Tiger* A=NULL, Cow* B=NULL, double dis=0): A(A), B(B) {}
-    bool operator<(const Node &op) const {
-        return dis > op.dis;
-    }
-};
-
-std::priority_queue<Node> que;
-std::set<Tiger*> matchedt;
-std::set<Cow*> matchedc;
-QList<Node> huntlist;
-
-// help function
-double mysystem::dist(Tiger* A, Cow* B) {
-    double x = A->displayx()-B->displayx(),
-            y = A->displayy()-B->displayy();
-    return std::sqrt(x*x+y*y);
-}
-
-void mysystem::match() {
-    // initialize
-    while (!que.empty()) que.pop();
-    matchedt.clear(); matchedc.clear();
-    huntlist.clear();
-    // find out hungry tigers and match the cows
-    for (Tiger* it: tigerlist)
-        if (it->ishungry()) {
-            for (Cow* itcow: cowlist)
-                que.push(Node(it, itcow, dist(it, itcow));
+        if(iter->faith()){//tiger代码同cow
+                if(iter->getenergy()<=0)
+                    tigerlist.removeOne(iter);
+                else
+                iter->energyloss(10);
+            }
+        else if (!iter->survival()){
+                iter->die();
         }
-    while (!que.empty()) {
-        Node tmp = que.top(); que.pop();
-        if (!matchedc.count(tmp.B) && ! matchedt.count(tmp.A)) {
-            huntlist.push_back(tmp);
-            matchedc.insert(tmp.A);
-            matchedt.insert(tmp.B);
+        else if (rand() % 2==1){
+                iter->setcoordinate(iter->displayx()+rand()/double(RAND_MAX)*this->width()/100,iter->displayy()+rand()/double(RAND_MAX)*this->width()/100);
+                iter->energyloss(50);
+        }
+        else{
+                iter->setcoordinate(iter->displayx()-rand()/double(RAND_MAX)*this->width()/100,iter->displayy()-rand()/double(RAND_MAX)*this->width()/100);
+                iter->energyloss(25);
         }
     }
-}
-
-void mysystem::hunt() {
-
-}
-
-void mysystem::escape() {
-    
 }
