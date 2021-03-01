@@ -24,6 +24,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += \
+    creature.cpp \
         main.cpp \
         mainwindow.cpp \
     mysystem.cpp \

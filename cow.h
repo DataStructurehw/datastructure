@@ -6,17 +6,12 @@
 
 class Cow:public Creature {
 public:
-        double getspeed();//every species has its own random speed
         double getprobability();//calculate probability of dying
         void energyloss(double);//how we define the energy loss, using speed or else?
         bool ishungry();
         bool isadult();//whether can mate
-        double getenergy();
-        void prey();//get energy from other creatures
+        void prey(double);//get energy from other creatures
         double returnage();//return the age
-        double displayx();
-        void setcoordinate(double,double);
-        double displayy();
         QColor getcolor();
         Cow(double, double, double, double, double, double);
 
