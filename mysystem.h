@@ -6,6 +6,7 @@
 #include "cow.h"
 #include "grass.h"
 #include "tiger.h"
+using namespace std;
 
 class testcreature{
 public:
@@ -56,12 +57,14 @@ private:
     void drawsystem(QPainter *painter);
     //更新系统，这里写process
     void updatesystem();
+    void match();
+    void hunt();
     QList<testcreature*> creaturelist;
     QList<Tiger*> tigerlist;
     QList<Cow*> cowlist;
     QList<Grass*> grasslist;
-    double w;
-    double h;
+    double w;//窗体宽度
+    double h;//窗体高度
 };
 
 

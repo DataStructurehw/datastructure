@@ -7,11 +7,12 @@
 class Creature {
 public:
         virtual double getspeed() = 0;//every species has its own random speed
-        virtual void energyloss() = 0;//how we define the energy loss, using speed or else?
+        virtual void energyloss(double) = 0;//how we define the energy loss, using speed or else?
         virtual bool ishungry() = 0;
         double getenergy();
         double displayx();
         double displayy();
+
 protected:
         double speed;
         double energy;

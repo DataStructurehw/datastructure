@@ -1,38 +1,33 @@
-//first version of class Cow (prototype
-//2021/1/18
-
 #ifndef COW_H
 #define COW_H
 #include "creature.h"
+#include <QWidget>
+#include <time.h>
 
 class Cow:public Creature {
 public:
-        virtual double getspeed() = 0;//every species has its own random speed
-        virtual void energyloss(double) = 0;//how we define the energy loss, using speed or else?
-        virtual bool ishungry() = 0;
+        double getspeed();//every species has its own random speed
+        double getprobability();//calculate probability of dying
+        void energyloss(double);//how we define the energy loss, using speed or else?
+        bool ishungry();
+        bool isadult();//whether can mate
         double getenergy();
+        void prey();//get energy from other creatures
+        double returnage();//return the age
         double displayx();
+        void setcoordinate(double,double);
         double displayy();
+        QColor getcolor();
         Cow(double, double, double, double, double, double);
 
 private:
-        const double matingage;//the age whether the Cows can mating
-        const double energy_threshhold;//when Cow is hungry
+        double matingage;//the age whether the Cows can mating
+        double energy_threshhold;//when Cow is hungry
+        double probability;//probability of dying
+        double birth;//caluation of age is not solved in this version
+        QColor owncolor=Qt::blue;
 };
 
-Cow::Cow(double speed_, double energy_, double x, double y, double matingage_, double energy_threshhold_):matingage(matingage_), energy_threshhold(energy_threshhold_) {
-        speed = speed_;
-        energy = energy_;
-        coordinatex = x; 
-        coordinatey = y;
-        hungry = false;
-}
 
-double Cow::getspeed() { return speed; }
-void Cow::energyloss(double cost) { energy -= cost; if(energy < energy_threshhold) hungry = true; }
-bool Cow::ishungry() { return hungry; }
-double Cow::getenergy() { return energy; }
-double Cow::displayx() { return coordinatex; }
-double Cow::displayy() { return coordinatey; }
 
 #endif // COW_H
