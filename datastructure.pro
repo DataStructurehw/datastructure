@@ -26,7 +26,10 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    mysystem.cpp
+    mysystem.cpp \
+    cow.cpp \
+    tiger.cpp \
+    grass.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -35,5 +38,8 @@ HEADERS += \
     creature.h \
     grass.h \
     tiger.h
+
+
+
 FORMS += \
         mainwindow.ui
