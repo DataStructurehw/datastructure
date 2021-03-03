@@ -1,12 +1,10 @@
 #include "creature.h"
 
-double Creature::getspeed() { return speed; }
 double Creature::getenergy() { return energy; }
-double Creature::displayx() { return coordinatex; }
-double Creature::displayy() { return coordinatey; }
-double Creature::displaytx() { return tx; }
-double Creature::displayty() { return ty; }
-void Creature::setcoordinate(double x, double y) { coordinatex = x; coordinatey = y; }
-void Creature::setdirection(double Tx, double Ty) { tx = Tx; ty = Ty; }
-void Creature::setspeed(double s) { speed = s; }
+std::complex<double> Creature::getLoc() { return loc; }
+std::complex<double> Creature::getVel() { return vel; }
+void Creature::setLoc(double x, double y) { setLoc(std::complex<double>(x, y)); }
+void Creature::setLoc(std::complex<double> newloc) { loc = newloc; }
+void Creature::setVel(double x, double y) { setVel(std::complex<double>(x, y)); }
+void Creature::setVel(std::complex<double> newvel) { vel = newvel; }
 double Creature::getprobability() { return probability; }

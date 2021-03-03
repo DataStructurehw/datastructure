@@ -1,15 +1,14 @@
 #include"grass.h"
 using namespace std;
-Grass::Grass(double speed_, double energy_, double x, double y, double growth_, double Eloss)
+Grass::Grass(double energy_, double x, double y, double growth_, double Eloss)
     :growth_time(growth_), Eloss_speed(Eloss) {
-        speed = speed_;
         energy = energy_;
-        coordinatex = x;
-        coordinatey = y;
+        setLoc(x, y);
         hungry = false;
         time_t t;
 		t=time(NULL); 
 		birth = t;
+        setVel(0, 0);
 }
 
 void Grass::energyloss(double x) { energy -= x; }//待补充

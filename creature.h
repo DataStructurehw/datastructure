@@ -4,6 +4,8 @@
 #ifndef CREATURE_H
 #define CREATURE_H
 
+#include <complex>
+
 class Creature {
 public:
         double getspeed();//every species has its own random speed
@@ -11,22 +13,17 @@ public:
         virtual bool ishungry() = 0;
         double getprobability();
         double getenergy();
-        double displayx();
-        double displayy();
-        double displaytx();
-        double displayty();
-        void setcoordinate(double, double);
-        void setdirection(double, double);
-        void setspeed(double);
+        std::complex<double> getLoc();
+        std::complex<double> getVel();
+        void setLoc(std::complex<double>);
+        void setLoc(double, double);
+        void setVel(std::complex<double>);
+        void setVel(double, double);
 
 protected:
-        double speed;
         double energy;
-        double coordinatex;
-        double coordinatey;
         bool hungry;
-        double tx;
-        double ty;
+        std::complex<double> loc, vel; // location, velocity
         double probability;//probability of dying
        //double life_span() whether we build in class or realize it by calculating on energy
 };

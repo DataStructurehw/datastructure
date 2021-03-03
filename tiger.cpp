@@ -1,11 +1,10 @@
 #include"tiger.h"
 using namespace std;
-Tiger::Tiger(double speed_, double energy_, double x, double y, double matingage_, double energy_threshhold_):
+Tiger::Tiger(double speed, double energy_, double x, double y, double matingage_, double energy_threshhold_):
     matingage(matingage_), energy_threshhold(energy_threshhold_) {
-        speed = speed_;
+        setVel(speed, 0);
         energy = energy_;
-        coordinatex = x;
-        coordinatey = y;
+        setLoc(x, y);
         hungry = false;
         time_t t;
 		t=time(NULL); 

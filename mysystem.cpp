@@ -44,7 +44,7 @@ void mysystem::initSystem(){
     const double energyGrass = 1e2, energyCow = 1e3, energyTiger = 1e4;
     srand(0);
     for (int i = 0; i < numGrass; ++i)
-        grasslist.push_back(new Grass(0.0, energyGrass,
+        grasslist.push_back(new Grass(energyGrass,
                             rand()/double(RAND_MAX)*this->width(),
                             rand()/double(RAND_MAX)*this->height(),0,0));
     for (int i = 0; i < numGroupCow; ++i) {                  // Cow群落生成
@@ -63,15 +63,15 @@ void mysystem::initSystem(){
 void mysystem::drawsystem(QPainter *painter){
     for(Grass* iter:grasslist){
         painter->setBrush(iter->getcolor());
-        painter->drawEllipse(QPointF(iter->displayx(),iter->displayy()),5,5);
+        painter->drawEllipse(QPointF(iter->getLoc().real(),iter->getLoc().imag()),5,5);
     }
     for(Cow* iter:cowlist){
         painter->setBrush(iter->getcolor());
-        painter->drawEllipse(QPointF(iter->displayx(),iter->displayy()),5,5);
+        painter->drawEllipse(QPointF(iter->getLoc().real(),iter->getLoc().imag()),5,5);
     }
     for(Tiger* iter:tigerlist){
         painter->setBrush(iter->getcolor());
-        painter->drawEllipse(QPointF(iter->displayx(),iter->displayy()),5,5);
+        painter->drawEllipse(QPointF(iter->getLoc().real(),iter->getLoc().imag()),5,5);
     }
 }
 
@@ -88,8 +88,8 @@ void mysystem::drawsystem(QPainter *painter){
 
 // help function
 double dist(Tiger* A, Cow* B) {
-    double x = (A->displayx())-(B->displayx()),
-            y = (A->displayy())-(B->displayy());
+    double x = (A->getLoc().real())-(B->getLoc().real()),
+            y = (A->getLoc().imag())-(B->getLoc().imag());
     return sqrt(x*x+y*y);
 }
 
@@ -115,15 +115,15 @@ QList<Node> huntlist;
 void mysystem::updatesystem(){
 //    for(Cow* iter:cowlist){
 //        if (rand() % 2==1)
-//        iter->setcoordinate(iter->displayx()+rand()/double(RAND_MAX)*this->width()/100,iter->displayy()+rand()/double(RAND_MAX)*this->width()/100);
+//        iter->setcoordinate(iter->getLoc().real()+rand()/double(RAND_MAX)*this->width()/100,iter->getLoc().imag()+rand()/double(RAND_MAX)*this->width()/100);
 //        else
-//            iter->setcoordinate(iter->displayx()-rand()/double(RAND_MAX)*this->width()/100,iter->displayy()-rand()/double(RAND_MAX)*this->width()/100);
+//            iter->setcoordinate(iter->getLoc().real()-rand()/double(RAND_MAX)*this->width()/100,iter->getLoc().imag()-rand()/double(RAND_MAX)*this->width()/100);
 //    }
 //    for(Tiger* iter:tigerlist){
 //        if (rand() % 2==1)
-//        iter->setcoordinate(iter->displayx()+rand()/double(RAND_MAX)*this->width()/100,iter->displayy()+rand()/double(RAND_MAX)*this->width()/100);
+//        iter->setcoordinate(iter->getLoc().real()+rand()/double(RAND_MAX)*this->width()/100,iter->getLoc().imag()+rand()/double(RAND_MAX)*this->width()/100);
 //        else
-//            iter->setcoordinate(iter->displayx()-rand()/double(RAND_MAX)*this->width()/100,iter->displayy()-rand()/double(RAND_MAX)*this->width()/100);
+//            iter->setcoordinate(iter->getLoc().real()-rand()/double(RAND_MAX)*this->width()/100,iter->getLoc().imag()-rand()/double(RAND_MAX)*this->width()/100);
 //    }
     match();
     DebugP(huntlist.size());
@@ -159,21 +159,21 @@ bool def_cd() {
 }
 
 // help function used to update Tiger and Cow
-const double pred_rad = 100, prey_rad = 100, limit = 1e-1;
+const double pred_rad = 100, prey_rad = 100, limit = 1e-1, eps = 1e-5;
 
 void update_prey(Tiger *A, Cow *B) {
-    double x1 = B->displayx(), y1 = B->displayy(), x2 = A->displayx(), y2 = A->displayy(),
-            d1 = B->displaytx(), d2 = B->displayty(); // d1 d2 B->displaytx()
+    double x1 = B->getLoc().real(), y1 = B->getLoc().imag(), x2 = A->getLoc().real(), y2 = A->getLoc().imag(),
+            d1 = B->getVel().real(), d2 = B->getVel().imag(); // d1 d2 B->getVel().real()
     // pre_speed = A->speed() B->speed()
     double pred_speed = 2 , prey_speed = 1,
             pred_speed_max = 1.5, prey_speed_max = 1.2, pred_a = 0.4, prey_a = 0.3, dis=dist(x1, y1, x2, y2);
 
     // Base Case
     if (dist(A, B) > prey_rad) return;
+    if (dis < eps) return;
 //    DebugP(huntlist.size());
     double tx = (x1-x2)/dis, ty = (y1-y2)/dis;
-    A->setdirection(tx, ty);
-    DebugP(B->displayx()); DebugP(B->displayy());
+    DebugP(B->getLoc().real()); DebugP(B->getLoc().imag());
     if (dis > pred_rad) { x2 += tx*pred_speed; y2 += ty*pred_speed; x1 += d1*prey_speed; y1 += d2*prey_speed; }
     else {
         pred_speed = min(pred_a+pred_speed, pred_speed_max);
@@ -182,30 +182,27 @@ void update_prey(Tiger *A, Cow *B) {
             prey_speed = min(prey_a+prey_speed, prey_speed_max);
             if (def_cd()) { double ptx = tx, pty = -ty, a = rand()%4-2; tx += a*ptx; ty += a*pty; double diss = sqrt(tx*tx+ty*ty); tx /= diss; ty /= diss; }
             x1 += tx*prey_speed; y1 += ty*prey_speed;
-            B->setdirection(tx, ty);
         }
     }
     // here would decrease their energy
-    B->setcoordinate(x1, y1); B->setspeed(prey_speed);
-//    A->setcoordinate(x2, y2); A->setspeed(pred_speed);
-    DebugP(B->displayx()); DebugP(B->displayy());
+    B->setLoc(x1, y1); B->setVel(prey_speed*std::complex<double>(tx, ty));
+//    A->setLoc(x2, y2); A->setspeed(pred_speed);
+    DebugP(B->getLoc().real()); DebugP(B->getLoc().imag());
 }
 
 bool prey_pred(Tiger *A, Cow *B) {
-    double x1 = B->displayx(), y1 = B->displayy(), x2 = A->displayx(), y2 = A->displayy(),
-            d1 = B->displaytx(), d2 = B->displayty(); // d1 d2 B->displaytx()
+    double x1 = B->getLoc().real(), y1 = B->getLoc().imag(), x2 = A->getLoc().real(), y2 = A->getLoc().imag(),
+            d1 = B->getVel().real(), d2 = B->getVel().imag(); // d1 d2 B->getVel().real()
     // pre_speed = A->speed() B->speed()
     double pred_speed = 2 , prey_speed = 1,
             pred_speed_max = 1.5, prey_speed_max = 1.2, pred_a = 0.4, prey_a = 0.3, dis=dist(x1, y1, x2, y2);
-
-    const double eps = 1e-1, limit = 1e-1;
     // Base Case
     if (dist(A, B) < eps) return true;
     //if (A->getenergy() < limit) return false;
 
     double tx = (x1-x2)/dis, ty = (y1-y2)/dis;
-    A->setdirection(tx, ty);
-    DebugP(B->displayx()); DebugP(B->displayy());
+    A->setVel(tx, ty);
+    DebugP(B->getLoc().real()); DebugP(B->getLoc().imag());
     if (dis > pred_rad) { x2 += tx*pred_speed; y2 += ty*pred_speed; x1 += d1*prey_speed; y1 += d2*prey_speed; }
     else {
         pred_speed = min(pred_a+pred_speed, pred_speed_max);
@@ -214,14 +211,14 @@ bool prey_pred(Tiger *A, Cow *B) {
             prey_speed = min(prey_a+prey_speed, prey_speed_max);
             if (def_cd()) { double ptx = tx, pty = -ty, a = rand()%4-2; tx += a*ptx; ty += a*pty; double diss = sqrt(tx*tx+ty*ty); tx /= diss; ty /= diss; }
             x1 += tx*prey_speed; y1 += ty*prey_speed;
-            B->setdirection(tx, ty);
+//            B->setVel(prey_speed*std::complex<double>(tx, ty));
         }
     }
     // here would decrease their energy
-//    B->setcoordinate(x1, y1); B->setspeed(prey_speed);
-    A->setcoordinate(x2, y2); A->setspeed(pred_speed);
+//    B->setLoc(x1, y1); B->setspeed(prey_speed);
+    A->setLoc(x2, y2); A->setVel(pred_speed*std::complex<double>(tx, ty));
     DebugP(dis);
-    DebugP(B->displayx()); DebugP(B->displayy());
+    DebugP(B->getLoc().real()); DebugP(B->getLoc().imag());
     return false;
 }
 
