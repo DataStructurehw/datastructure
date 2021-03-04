@@ -2,7 +2,7 @@
 using namespace std;
 Cow::Cow(double speed, double energy_, double x, double y, double matingage_, double energy_threshhold_)
     :matingage(matingage_), energy_threshhold(energy_threshhold_) {
-        setVel(speed, 0);
+        setVel(speed*exp(std::complex<double>(0, (double)rand()/RAND_MAX*M_PI*2)));
         energy = energy_;
         setLoc(x, y);
         hungry = false;

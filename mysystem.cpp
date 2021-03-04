@@ -42,7 +42,6 @@ void mysystem::initSystem(){
     srand((unsigned)time(NULL));
     const int numGrass = 100, numGroupCow = 10, numCowPerG = 10, numTiger = 10;
     const double energyGrass = 1e2, energyCow = 1e3, energyTiger = 1e4;
-    srand(0);
     for (int i = 0; i < numGrass; ++i)
         grasslist.push_back(new Grass(energyGrass,
                             rand()/double(RAND_MAX)*this->width(),
@@ -52,11 +51,11 @@ void mysystem::initSystem(){
                 centery = rand()/double(RAND_MAX)*this->height();
         const double limx = 10, limy = 10;
         for (int j = 0; j < numCowPerG; ++j)
-            cowlist.push_back(new Cow(0,0,rand()/double(RAND_MAX)*limx-limx/2+centerx,
+            cowlist.push_back(new Cow(1,0,rand()/double(RAND_MAX)*limx-limx/2+centerx,
                                 rand()/double(RAND_MAX)*limy-limy/2+centery,0,0));
     }
     for (int i = 0; i < numTiger; ++i)
-        tigerlist.push_back(new Tiger(0,0,rand()/double(RAND_MAX)*this->width(),
+        tigerlist.push_back(new Tiger(2,0,rand()/double(RAND_MAX)*this->width(),
                                       rand()/double(RAND_MAX)*this->height(),0,0));
 }
 
