@@ -9,10 +9,11 @@ Cow::Cow(double speed, double energy_, double x, double y, double matingage_, do
         time_t t;
 		t=time(NULL); 
 		birth = t;
+        setState(0);
 }
 
 
-void Cow::energyloss(double cost) { energy -= cost; if(energy < energy_threshhold) hungry = true; }
+void Cow::energyloss(double cost) { energy -= cost; energy = min(energy, energy_threshhold*3); if(energy < energy_threshhold) hungry = true; else hungry = false; }
 bool Cow::ishungry() { return hungry; }
 bool Cow::isadult() { return returnage()-matingage > 0; }
 void Cow::prey(double energyget) { energy += energyget; }
@@ -20,3 +21,5 @@ double Cow::returnage() { time_t t; t=time(NULL); return difftime(birth,t); }
 QColor Cow::getcolor(){
     return owncolor;
 }
+int Cow::getState() { return state; }
+void Cow::setState(int _state) { state = _state; }

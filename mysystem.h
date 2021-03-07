@@ -6,6 +6,7 @@
 #include "cow.h"
 #include "grass.h"
 #include "tiger.h"
+#include <set>
 using namespace std;
 
 class testcreature{
@@ -58,11 +59,16 @@ private:
     //更新系统，这里写process
     void updatesystem();
     void match();
-    void hunt();
+    void matchGT();
+    void matchCG();
+    void freeWalk();
+    void takeFood();
+    void clearDeath();
+    void updateEnergy();
     QList<testcreature*> creaturelist;
-    QList<Tiger*> tigerlist;
-    QList<Cow*> cowlist;
-    QList<Grass*> grasslist;
+    std::set<Tiger*> tigerlist;
+    std::set<Cow*> cowlist;
+    std::set<Grass*> grasslist;
     double w;//窗体宽度
     double h;//窗体高度
 };
