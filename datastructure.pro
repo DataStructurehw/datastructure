@@ -29,7 +29,8 @@ SOURCES += \
     mysystem.cpp \
     cow.cpp \
     tiger.cpp \
-    grass.cpp
+    grass.cpp \
+    mammal.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -37,7 +38,8 @@ HEADERS += \
     cow.h \
     creature.h \
     grass.h \
-    tiger.h
+    tiger.h \
+    mammal.h
 
 
 

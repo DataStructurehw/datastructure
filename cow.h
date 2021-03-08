@@ -1,10 +1,11 @@
 #ifndef COW_H
 #define COW_H
-#include "creature.h"
+#include "mammal.h"
 #include <QWidget>
-class Cow:public Creature {
+class Cow:public mammal{
 public:
         Cow(double, double, double,bool,int);//新加了参数
+<<<<<<< Updated upstream
 
         double getspeed();
         double getenergy();
@@ -27,6 +28,9 @@ public:
 private:
 
         int born_date;//加了出生日期
+=======
+        QColor owncolor=Qt::blue;
+>>>>>>> Stashed changes
 };
 
 

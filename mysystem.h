@@ -22,6 +22,8 @@ public:
     }
     explicit mysystem(QWidget *parent = nullptr);
     ~mysystem();
+
+    void normalize(double&,double&);
 protected:
     void paintEvent(QPaintEvent *event) override;
 

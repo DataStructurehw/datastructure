@@ -1,10 +1,11 @@
 #ifndef TIGER_H
 #define TIGER_H
-#include "creature.h"
+#include "mammal.h"
 #include <QWidget>
-class Tiger:public Creature {
+class Tiger:public mammal {
 public:
         Tiger(double, double, double,bool,int);//新加了参数
+<<<<<<< Updated upstream
 
         double getspeed();
         double getenergy();
@@ -27,6 +28,15 @@ public:
 private:
 
         int born_date;//加了出生日期
+=======
+        double territoryx;//
+        double territoryy;//
+        double territoryr;//
+        double now_vecx;//
+        double now_vecy;//
+        double change_time=0;//
+        QColor owncolor=Qt::red;
+>>>>>>> Stashed changes
 };
 
 
