@@ -108,15 +108,6 @@ struct NodeCG { // Cow eats  Grass
     }
 };
 
-struct NodeGT {
-    Tiger* T;
-    Grass* G;
-    double dis;
-    NodeGT(Grass* G=NULL, Tiger* T=NULL):T(T), G(G) { dis = abs(G->getLoc()-T->getLoc()); }
-    bool operator<(const NodeGT &op) const {
-        return dis > op.dis;
-    }
-};
 
 
 const double pred_rad = 100, prey_rad = 100, eps = 2.4, RunTime = 1.0, Theta = M_PI_2 / 5;
@@ -125,7 +116,6 @@ const complex<double> I(0, 1);
 
 
 std::priority_queue<Node> que;
-std::priority_queue<NodeGT> gtque;
 std::priority_queue<NodeCG> pque;
 std::set<Tiger*> matchedt;
 std::set<Cow*> matchedc;
@@ -138,45 +128,34 @@ std::set<Cow*> escC;
 std::set<Grass*> matchG;
 
 
-void mysystem::matchGT() {
-    while (!gtque.empty()) gtque.pop();
-    matchG.clear();
-    for (Grass* g : grasslist)
-        for (Tiger* t : tigerlist)
-            if (abs(t->getLoc()-g->getLoc()) < 100) gtque.push(NodeGT(g, t));
-    while (!gtque.empty()) {
-        NodeGT tmp = gtque.top(); gtque.pop();
-        matchG.insert(tmp.G);
-    }
-}
-
 
 void mysystem::matchCG() {
     while (!pque.empty()) pque.pop();
     matchedC.clear(); matchedG.clear();
     eatList.clear();
-    int cnt1=0;
+    int safeRad = 100;
     for (Cow* it: cowlist)
-        if (it->ishungry()) {// condition hungry and condition safe  (it->ishungry())
-            cnt1++;
-            for (Grass* itG: grasslist)
-                if (!matchG.count(itG)) pque.push(NodeCG(it, itG));
+        if (!it->getstate() && it->ishungry()) {// condition hungry and condition safe  (it->ishungry())
+            for (Grass* itG: grasslist) {
+                int flag = 0;
+                for (Tiger* itT: tigerlist)
+                    if (abs(itG->getLoc()-itT->getLoc()) < safeRad) { flag = 1; break; }
+                if (!flag) pque.push(NodeCG(it, itG));
+            }
         }
     while (!pque.empty()) {
         NodeCG tmp = pque.top(); pque.pop();
         if (!matchedC.count(tmp.C) && !matchedG.count(tmp.G)) {
             eatList.push_back(tmp);
-            cnt1--;
             matchedC.insert(tmp.C);
             matchedG.insert(tmp.G);
         }
     }
-    if(cnt1>0) qDebug()<<1;
 }
 
 void eatGrass(Cow* C, Grass* G) {
     complex<double> cLoc = C->getLoc(), gLoc = G->getLoc(), cTg = gLoc-cLoc, speed = abs(C->getVel());
-    if (abs(cTg) < eps) { C->setVel(0,0); return; } // Cow has eaten the grass
+    if (abs(cTg) < eps) return; // Cow has eaten the grass
     C->setVel(cTg/abs(cTg)*speed);
     C->setLoc(cLoc+C->getVel());
 }
@@ -206,11 +185,16 @@ void hunt(Tiger *T, Cow *C) {
     std::complex<double> tLoc = T->getLoc(), cLoc = C->getLoc(), tVel = T->getVel(), TtoC = cLoc-tLoc;
     double dist = abs(TtoC), tSped = abs(tVel);
     if (dist < eps || T->getenergy() < engThresh) return; // hunt will end if T got the C or T has no energy
-    if (dist > pred_rad) T->setLoc(tLoc+tVel*RunTime);
-    else {
-        T->setVel(TtoC/dist*min(tSped+tA*RunTime, tSpedMax));
-        T->setLoc(tLoc+tVel*RunTime);
-    }
+    if (dist > pred_rad) {
+            // get close to the cow slowly
+            T->setVel(TtoC/dist*tSped);
+            T->setLoc(tLoc+tVel*RunTime);
+        }
+        else {
+            // accelerate
+            T->setVel(TtoC/dist*min(tSped+tA*RunTime, tSpedMax));
+            T->setLoc(tLoc+tVel*RunTime);
+        }
 }
 
 void escape() { // update the cows in esclist
@@ -240,6 +224,7 @@ void mysystem::match() { // clarify the relationship between the creature
             for (Cow* itcow: cowlist)
                 que.push(Node(it, itcow));
         }
+        else it->setstate(0);
     while (!que.empty()) {
         Node tmp = que.top(); que.pop();
         if (!matchedc.count(tmp.B) && !matchedt.count(tmp.A)) {
@@ -289,7 +274,7 @@ void mysystem::updateEnergy() {
 
 void mysystem::takeFood() {
     for (auto it: eatList)
-        if (abs(it.C->getLoc()-it.G->getLoc()) < eps*2) {
+        if (abs(it.C->getLoc()-it.G->getLoc()) < eps*3) {
             it.C->energyloss(-it.G->getenergy()*0.9);
             grasslist.erase(it.G);
             delete it.G;
@@ -408,7 +393,6 @@ void mysystem::updatesystem(){
     match();
     for (auto it: huntlist) hunt(it.A, it.B);
     escape();
-    matchGT();
     matchCG();
     for (auto it: eatList) eatGrass(it.C, it.G);
     takeFood();

@@ -34,7 +34,6 @@ private:
     void updatesystem();
     void Hang_out(Creature*);
     void match();
-    void matchGT();
     void matchCG();
     void freeWalk();
     void takeFood();
