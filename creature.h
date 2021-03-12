@@ -5,6 +5,8 @@
 #define CREATURE_H
 
 #include <complex>
+#define M_PI 3.1415926
+#define M_PI_2 3.1415926/2
 
 class Creature {
 public:

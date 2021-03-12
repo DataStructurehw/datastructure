@@ -9,8 +9,8 @@ mammal::mammal(double energy_, double x, double y,bool sexx,int born_datee)
     setstate(0);
     double speed=1;
     setVel(speed*exp(std::complex<double>(0, (double)rand()/RAND_MAX*M_PI*2)));
-    sex= sexx;//新加的
-    born_date=born_datee;//新加的
+    sex= sexx;//Newly added
+    born_date=born_datee;//Newly added
     matingage=400;
     energy_threshhold=1000;
     energy_threshhold2=1600;
@@ -25,9 +25,8 @@ double mammal::getspeed() {
     return 0;
 }
 bool mammal::ishungry(){
-    if (energy>energy_threshhold2) eflag=0;
-    if (energy<energy_threshhold) eflag=1;
-    return eflag;
+    if (getenergy()>energy_threshhold) return 0;
+    else return 1;
 }
 
 void mammal::energyloss(double cost) {

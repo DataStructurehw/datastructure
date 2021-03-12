@@ -4,7 +4,7 @@
 #include <QWidget>
 class Tiger:public mammal {
 public:
-        Tiger(double, double, double,bool,int);//新加了参数
+        Tiger(double, double, double,bool,int);//add new parameters
         double territoryx;//
         double territoryy;//
         double territoryr;//

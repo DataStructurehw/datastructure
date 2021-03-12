@@ -15,10 +15,10 @@ double Grass::getspeed() {
 }
 void Grass::energyloss(double x) {
     energy -= x;
-}//待补充
+}//To be added
 bool Grass::ishungry() {
     return 0;
-}//待补充
+}//To be added
 double Grass::getenergy() {
     return energy;
 }

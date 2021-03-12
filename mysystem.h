@@ -34,7 +34,7 @@ private:
     void updatesystem();
     void Hang_out(Creature*);
     void match();
-    void matchGT();
+//    void matchGT();
     void matchCG();
     void freeWalk();
     void takeFood();
@@ -44,8 +44,8 @@ private:
     set<Cow*> cowlist;
     set<Grass*> grasslist;
 
-    double w;//窗体宽度
-    double h;//窗体高度
+    double w;//window width
+    double h;//window heigth
 };
 
 

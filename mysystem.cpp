@@ -20,7 +20,7 @@ mysystem::mysystem(QWidget *parent)
         updatesystem();
         update();
     });
-    timer->start(1000/60);
+    timer->start(1000/80);
 }
 mysystem::~mysystem(){
 }
@@ -33,7 +33,7 @@ void mysystem::paintEvent(QPaintEvent *event){
 }
 
 void mysystem::initSystem(){
-    const int numGrass = 300, numGroupCow = 6, numCowPerG = 5, numTiger = 5;//
+    const int numGrass = 300, numGroupCow = 10, numCowPerG = 5, numTiger = 10;//
     for (int i = 0; i < numGrass; ++i)
         grasslist.insert(new Grass(1000,
                             rand()/double(RAND_MAX)*this->width(),
@@ -43,13 +43,13 @@ void mysystem::initSystem(){
                 centery = rand()/double(RAND_MAX)*this->height();
         const double limx = 10, limy = 10;
         for (int j = 0; j < rand()%numCowPerG; ++j)
-            cowlist.insert(new Cow(2000,rand()/double(RAND_MAX)*limx-limx/2+centerx,
+            cowlist.insert(new Cow(20000,rand()/double(RAND_MAX)*limx-limx/2+centerx,
                                 rand()/double(RAND_MAX)*limy-limy/2+centery,rand()%2,cnt));//
     }
     for (int i = 0; i < numTiger; ++i){
         int tmp = rand()%2;
-        tigerlist.insert(new Tiger(2000,rand()/double(RAND_MAX)*(this->width()-200)+100,
-                                      rand()/double(RAND_MAX)*(this->height()-200)+100,tmp,cnt));//匹配新的构造函数
+        tigerlist.insert(new Tiger(2000,rand()/double(RAND_MAX)*this->width(),
+                                      rand()/double(RAND_MAX)*this->height(),tmp,cnt));//match new construct function
     }
 }
 
@@ -65,7 +65,7 @@ void mysystem::drawsystem(QPainter *painter){
         if(cnt-iter->getage()>iter->matingage)
         {
             if(cnt-iter->lastgen>100)
-            painter->drawEllipse(QPointF(iter->getLoc().real(), iter->getLoc().imag()),5,5);
+                painter->drawEllipse(QPointF(iter->getLoc().real(), iter->getLoc().imag()),5,5);
             else
                 painter->drawEllipse(QPointF(iter->getLoc().real(), iter->getLoc().imag()),10,10);
         }
@@ -108,24 +108,11 @@ struct NodeCG { // Cow eats  Grass
     }
 };
 
-struct NodeGT {
-    Tiger* T;
-    Grass* G;
-    double dis;
-    NodeGT(Grass* G=NULL, Tiger* T=NULL):T(T), G(G) { dis = abs(G->getLoc()-T->getLoc()); }
-    bool operator<(const NodeGT &op) const {
-        return dis > op.dis;
-    }
-};
-
-
 const double pred_rad = 100, prey_rad = 100, eps = 2.4, RunTime = 1.0, Theta = M_PI_2 / 5;
 const double tA = 0.2, tSpedMax = 2.5, tB = 0.18, cSpedMax = 2.0, engThresh = 0;
 const complex<double> I(0, 1);
 
-
 std::priority_queue<Node> que;
-std::priority_queue<NodeGT> gtque;
 std::priority_queue<NodeCG> pque;
 std::set<Tiger*> matchedt;
 std::set<Cow*> matchedc;
@@ -134,59 +121,41 @@ QList<pair<Cow*, std::complex<double> > > esclist;
 std::set<Cow*> matchedC;
 std::set<Grass*> matchedG;
 QList<NodeCG> eatList;
-std::set<Cow*> escC;
 std::set<Grass*> matchG;
-
-
-void mysystem::matchGT() {
-    while (!gtque.empty()) gtque.pop();
-    matchG.clear();
-    for (Grass* g : grasslist)
-        for (Tiger* t : tigerlist)
-            if (abs(t->getLoc()-g->getLoc()) < 100) gtque.push(NodeGT(g, t));
-    while (!gtque.empty()) {
-        NodeGT tmp = gtque.top(); gtque.pop();
-        matchG.insert(tmp.G);
-    }
-}
-
 
 void mysystem::matchCG() {
     while (!pque.empty()) pque.pop();
     matchedC.clear(); matchedG.clear();
     eatList.clear();
-    int cnt1=0;
+    int safeRad = 100;
     for (Cow* it: cowlist)
-        if (it->ishungry()) {// condition hungry and condition safe  (it->ishungry())
-            cnt1++;
-            for (Grass* itG: grasslist)
-                if (!matchG.count(itG)) pque.push(NodeCG(it, itG));
+        if (!it->getstate() && it->ishungry()) {// condition hungry and condition safe  (it->ishungry())
+            for (Grass* itG: grasslist) {
+                int flag = 0;
+                for (Tiger* itT: tigerlist)
+                    if (abs(itG->getLoc()-itT->getLoc()) < safeRad) { flag = 1; break; }
+                if (!flag) pque.push(NodeCG(it, itG));
+            }
         }
     while (!pque.empty()) {
         NodeCG tmp = pque.top(); pque.pop();
         if (!matchedC.count(tmp.C) && !matchedG.count(tmp.G)) {
             eatList.push_back(tmp);
-            cnt1--;
             matchedC.insert(tmp.C);
             matchedG.insert(tmp.G);
         }
     }
-    if(cnt1>0) qDebug()<<1;
 }
 
 void eatGrass(Cow* C, Grass* G) {
     complex<double> cLoc = C->getLoc(), gLoc = G->getLoc(), cTg = gLoc-cLoc, speed = abs(C->getVel());
-    if (abs(cTg) < eps) { C->setVel(0,0); return; } // Cow has eaten the grass
+    if (abs(cTg) < eps) return; // Cow has eaten the grass
     C->setVel(cTg/abs(cTg)*speed);
     C->setLoc(cLoc+C->getVel());
 }
 
 void updateFreeWalk(Creature *it) {
     it->setVel(it->getVel()*exp((Theta*rand()/RAND_MAX*2-Theta)*I));
-    int tmp1=1,tmp2=1;
-    if (it->getLoc().real()+it->getVel().real()<0 || it->getLoc().real()+it->getVel().real()>800) tmp1=-1;
-    if (it->getLoc().imag()+it->getVel().imag()<0 || it->getLoc().imag()+it->getVel().imag()>600) tmp2=-1;
-    it->setVel(tmp1*it->getVel().real(),tmp2*it->getVel().imag());
     it->setLoc(it->getLoc()+it->getVel()*RunTime);
 }
 
@@ -206,8 +175,13 @@ void hunt(Tiger *T, Cow *C) {
     std::complex<double> tLoc = T->getLoc(), cLoc = C->getLoc(), tVel = T->getVel(), TtoC = cLoc-tLoc;
     double dist = abs(TtoC), tSped = abs(tVel);
     if (dist < eps || T->getenergy() < engThresh) return; // hunt will end if T got the C or T has no energy
-    if (dist > pred_rad) T->setLoc(tLoc+tVel*RunTime);
+    if (dist > pred_rad) {
+        // get close to the cow slowly
+        T->setVel(TtoC/dist*tSped);
+        T->setLoc(tLoc+tVel*RunTime);
+    }
     else {
+        // accelerate
         T->setVel(TtoC/dist*min(tSped+tA*RunTime, tSpedMax));
         T->setLoc(tLoc+tVel*RunTime);
     }
@@ -240,6 +214,7 @@ void mysystem::match() { // clarify the relationship between the creature
             for (Cow* itcow: cowlist)
                 que.push(Node(it, itcow));
         }
+        else it->setstate(0);
     while (!que.empty()) {
         Node tmp = que.top(); que.pop();
         if (!matchedc.count(tmp.B) && !matchedt.count(tmp.A)) {
@@ -273,14 +248,14 @@ void mysystem::match() { // clarify the relationship between the creature
 
 double calEnergy(Creature *it, double k, double t) {
     double v = abs(it->getVel());
-    return k*v*v + t;
+    return k*v*RunTime + t;
 }
 
 void mysystem::updateEnergy() {
     for (Cow *it: cowlist)
-        it->energyloss(calEnergy(it, 0.01, 1));
+        it->energyloss(calEnergy(it, 0.25, 0.1));
     for (Tiger *it: tigerlist) {
-        it->energyloss(calEnergy(it, 0.01, 1));
+        it->energyloss(calEnergy(it, 0.5, 0.1));
 
     }
     for (Grass *it: grasslist)
@@ -289,7 +264,7 @@ void mysystem::updateEnergy() {
 
 void mysystem::takeFood() {
     for (auto it: eatList)
-        if (abs(it.C->getLoc()-it.G->getLoc()) < eps*2) {
+        if (abs(it.C->getLoc()-it.G->getLoc()) < 10) {
             it.C->energyloss(-it.G->getenergy()*0.9);
             grasslist.erase(it.G);
             delete it.G;
@@ -330,7 +305,7 @@ void mysystem::Hang_out(Creature* x){
             vecx=iter->getLoc().real() - xx->getLoc().real();
             vecy=iter->getLoc().imag() - xx->getLoc().imag();
             if(vecx>-20&&vecx<=20 && -20<=vecy && vecy<=20){
-                if(rand()%15<2 && xx->getenergy()>=xx->energy_threshhold2 && iter->getenergy()>=iter->energy_threshhold2 && xx->sex^iter->sex && cnt-xx->getage()>xx->matingage && cnt-iter->getage()>iter->matingage){
+                if(rand()%15<2 && xx->getenergy()>=xx->energy_threshhold && iter->getenergy()>=iter->energy_threshhold && xx->sex^iter->sex && cnt-xx->getage()>xx->matingage && cnt-iter->getage()>iter->matingage){
                     if(iter->sex==0) iter->ispregnant=1;
                     else xx->ispregnant=1;
                     tigerlist.insert(new Tiger(xx->getenergy()/3,iter->getLoc().real(),iter->getLoc().imag(),rand()%2,cnt));
@@ -381,8 +356,8 @@ void mysystem::Hang_out(Creature* x){
             vecx=iter->getLoc().real() - xx->getLoc().real();
             vecy=iter->getLoc().imag() - xx->getLoc().imag();
             if(vecx>-20&&vecx<=20 && -20<=vecy && vecy<=20){
-                if(rand()%15<2 && xx->getenergy()>=xx->energy_threshhold2
-                        && iter->getenergy()>=iter->energy_threshhold2 && xx->sex^iter->sex &&
+                if(rand()%15<2 && xx->getenergy()>=xx->energy_threshhold
+                        && iter->getenergy()>=iter->energy_threshhold && xx->sex^iter->sex &&
                         cnt-xx->getage()>xx->matingage && cnt-iter->getage()>iter->matingage){
                     cowlist.insert(new Cow(xx->getenergy()/3,iter->getLoc().real(),iter->getLoc().imag(),rand()%2,cnt));
                     iter->lastgen=xx->lastgen=cnt;
@@ -408,7 +383,7 @@ void mysystem::updatesystem(){
     match();
     for (auto it: huntlist) hunt(it.A, it.B);
     escape();
-    matchGT();
+//    matchGT();
     matchCG();
     for (auto it: eatList) eatGrass(it.C, it.G);
     takeFood();

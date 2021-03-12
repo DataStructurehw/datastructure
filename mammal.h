@@ -32,7 +32,6 @@ public:
     bool death;
     bool hungry;
     bool survival();
-    bool eflag;
     bool faith();
     bool isadult();
 
@@ -46,7 +45,7 @@ public:
     QList<mammal*> childlist;
 private:
 
-        int born_date;//加了出生日期
+        int born_date;// add birth
 };
 
 #endif // MAMMAL_H

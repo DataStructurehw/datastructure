@@ -4,7 +4,7 @@
 #include <QWidget>
 class Cow:public mammal{
 public:
-        Cow(double, double, double,bool,int);//新加了参数
+        Cow(double, double, double,bool,int);//add parameters
         QColor owncolor=Qt::blue;
 };
 
