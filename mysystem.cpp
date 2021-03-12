@@ -63,7 +63,12 @@ void mysystem::drawsystem(QPainter *painter){
         painter->setBrush(iter->owncolor);
         else painter->setBrush(Qt::darkBlue);
         if(cnt-iter->getage()>iter->matingage)
-        painter->drawEllipse(QPointF(iter->getLoc().real(), iter->getLoc().imag()),5,5);
+        {
+            if(cnt-iter->lastgen>100)
+            painter->drawEllipse(QPointF(iter->getLoc().real(), iter->getLoc().imag()),5,5);
+            else
+                painter->drawEllipse(QPointF(iter->getLoc().real(), iter->getLoc().imag()),10,10);
+        }
         else
         painter->drawEllipse(QPointF(iter->getLoc().real(), iter->getLoc().imag()),2,2);
     }
@@ -150,8 +155,10 @@ void mysystem::matchCG() {
     while (!pque.empty()) pque.pop();
     matchedC.clear(); matchedG.clear();
     eatList.clear();
+    int cnt1=0;
     for (Cow* it: cowlist)
-        if (!escC.count(it) && it->ishungry()) {// condition hungry and condition safe  (it->ishungry())
+        if (it->ishungry()) {// condition hungry and condition safe  (it->ishungry())
+            cnt1++;
             for (Grass* itG: grasslist)
                 if (!matchG.count(itG)) pque.push(NodeCG(it, itG));
         }
@@ -159,10 +166,12 @@ void mysystem::matchCG() {
         NodeCG tmp = pque.top(); pque.pop();
         if (!matchedC.count(tmp.C) && !matchedG.count(tmp.G)) {
             eatList.push_back(tmp);
+            cnt1--;
             matchedC.insert(tmp.C);
             matchedG.insert(tmp.G);
         }
     }
+    if(cnt1>0) qDebug()<<1;
 }
 
 void eatGrass(Cow* C, Grass* G) {
@@ -175,10 +184,6 @@ void eatGrass(Cow* C, Grass* G) {
 void updateFreeWalk(Creature *it) {
     it->setVel(it->getVel()*exp((Theta*rand()/RAND_MAX*2-Theta)*I));
     it->setLoc(it->getLoc()+it->getVel()*RunTime);
-    if(typeid(*it).name()==typeid(Cow).name())
-    {
-        qDebug()<<it->getLoc().real()<<it->getVel().real();
-    }
 }
 
 void mysystem::freeWalk() { // cow and tiger would like free walking if they are not hunting or escaping.
@@ -280,7 +285,7 @@ void mysystem::updateEnergy() {
 
 void mysystem::takeFood() {
     for (auto it: eatList)
-        if (abs(it.C->getLoc()-it.G->getLoc()) < eps) {
+        if (abs(it.C->getLoc()-it.G->getLoc()) < 10) {
             it.C->energyloss(-it.G->getenergy()*0.9);
             grasslist.erase(it.G);
             delete it.G;
@@ -318,13 +323,13 @@ void mysystem::Hang_out(Creature* x){
         double vecx=0,vecy=0,svecx=0,svecy=0;
         for(auto iter:tigerlist){
             if(xx->sex==0) xx->territoryr=20;
-            vecx=iter->displayx() - xx->displayx();
-            vecy=iter->displayy() - xx->displayy();
+            vecx=iter->getLoc().real() - xx->getLoc().real();
+            vecy=iter->getLoc().imag() - xx->getLoc().imag();
             if(vecx>-20&&vecx<=20 && -20<=vecy && vecy<=20){
                 if(rand()%15<2 && xx->getenergy()>=xx->energy_threshhold && iter->getenergy()>=iter->energy_threshhold && xx->sex^iter->sex && cnt-xx->getage()>xx->matingage && cnt-iter->getage()>iter->matingage){
                     if(iter->sex==0) iter->ispregnant=1;
                     else xx->ispregnant=1;
-                    tigerlist.insert(new Tiger(xx->getenergy()/3,iter->displayx(),iter->displayy(),rand()%2,cnt));
+                    tigerlist.insert(new Tiger(xx->getenergy()/3,iter->getLoc().real(),iter->getLoc().imag(),rand()%2,cnt));
                     tigernumber++;
                     iter->lastgen=xx->lastgen=cnt;
                     xx->energyloss(xx->getenergy()/3);
@@ -342,8 +347,8 @@ void mysystem::Hang_out(Creature* x){
                 double angle_next=i*10+fir;
                 double x_next=xx->territoryx+xx->territoryr*cos(angle_next*3.14159/180);
                 double y_next=xx->territoryy+xx->territoryr*sin(angle_next*3.14159/180);
-                double x_dif=x_next-xx->displayx();
-                double y_dif=y_next-xx->displayy();
+                double x_dif=x_next-xx->getLoc().real();
+                double y_dif=y_next-xx->getLoc().imag();
                 double dis=sqrt(x_dif*x_dif+y_dif*y_dif);
                 dis_sum[i+1]=dis_sum[i]+dis;
             }
@@ -352,8 +357,8 @@ void mysystem::Hang_out(Creature* x){
             double x_next=xx->territoryx+xx->territoryr*cos(angle_pos*3.14159/180);
             double y_next=xx->territoryy+xx->territoryr*sin(angle_pos*3.14159/180);
 
-            svecx=x_next-xx->displayx();
-            svecy=y_next-xx->displayy();
+            svecx=x_next-xx->getLoc().real();
+            svecy=y_next-xx->getLoc().imag();
             normalize(svecx,svecy);
             xx->now_vecx=svecx;
             xx->now_vecy=svecy;
@@ -369,12 +374,13 @@ void mysystem::Hang_out(Creature* x){
         double vecx=0,vecy=0,svecx=0,svecy=0;
         Cow* xx=dynamic_cast<Cow*>(x);
         for(auto iter:cowlist){
-            vecx=iter->displayx() - xx->displayx();
-            vecy=iter->displayy() - xx->displayy();
+            vecx=iter->getLoc().real() - xx->getLoc().real();
+            vecy=iter->getLoc().imag() - xx->getLoc().imag();
             if(vecx>-20&&vecx<=20 && -20<=vecy && vecy<=20){
-                if(rand()%15<2 && xx->getenergy()>=xx->energy_threshhold && iter->getenergy()>=iter->energy_threshhold && xx->sex^iter->sex &&
+                if(rand()%15<2 && xx->getenergy()>=xx->energy_threshhold
+                        && iter->getenergy()>=iter->energy_threshhold && xx->sex^iter->sex &&
                         cnt-xx->getage()>xx->matingage && cnt-iter->getage()>iter->matingage){
-                    cowlist.insert(new Cow(xx->getenergy()/3,iter->displayx(),iter->displayy(),rand()%2,cnt));
+                    cowlist.insert(new Cow(xx->getenergy()/3,iter->getLoc().real(),iter->getLoc().imag(),rand()%2,cnt));
                     iter->lastgen=xx->lastgen=cnt;
                     xx->energyloss(xx->getenergy()/3);
                     iter->energyloss(iter->getenergy()/3);
