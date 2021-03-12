@@ -32,6 +32,7 @@ public:
     bool death;
     bool hungry;
     bool survival();
+    bool eflag;
     bool faith();
     bool isadult();
 

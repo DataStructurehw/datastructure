@@ -48,8 +48,8 @@ void mysystem::initSystem(){
     }
     for (int i = 0; i < numTiger; ++i){
         int tmp = rand()%2;
-        tigerlist.insert(new Tiger(2000,rand()/double(RAND_MAX)*this->width(),
-                                      rand()/double(RAND_MAX)*this->height(),tmp,cnt));//匹配新的构造函数
+        tigerlist.insert(new Tiger(2000,rand()/double(RAND_MAX)*(this->width()-200)+100,
+                                      rand()/double(RAND_MAX)*(this->height()-200)+100,tmp,cnt));//匹配新的构造函数
     }
 }
 
@@ -183,6 +183,10 @@ void eatGrass(Cow* C, Grass* G) {
 
 void updateFreeWalk(Creature *it) {
     it->setVel(it->getVel()*exp((Theta*rand()/RAND_MAX*2-Theta)*I));
+    int tmp1=1,tmp2=1;
+    if (it->getLoc().real()+it->getVel().real()<0 || it->getLoc().real()+it->getVel().real()>800) tmp1=-1;
+    if (it->getLoc().imag()+it->getVel().imag()<0 || it->getLoc().imag()+it->getVel().imag()>600) tmp2=-1;
+    it->setVel(tmp1*it->getVel().real(),tmp2*it->getVel().imag());
     it->setLoc(it->getLoc()+it->getVel()*RunTime);
 }
 
@@ -274,9 +278,9 @@ double calEnergy(Creature *it, double k, double t) {
 
 void mysystem::updateEnergy() {
     for (Cow *it: cowlist)
-        it->energyloss(calEnergy(it, 2, 1));
+        it->energyloss(calEnergy(it, 0.01, 1));
     for (Tiger *it: tigerlist) {
-        it->energyloss(calEnergy(it, 1, 1));
+        it->energyloss(calEnergy(it, 0.01, 1));
 
     }
     for (Grass *it: grasslist)
@@ -285,7 +289,7 @@ void mysystem::updateEnergy() {
 
 void mysystem::takeFood() {
     for (auto it: eatList)
-        if (abs(it.C->getLoc()-it.G->getLoc()) < 10) {
+        if (abs(it.C->getLoc()-it.G->getLoc()) < eps*2) {
             it.C->energyloss(-it.G->getenergy()*0.9);
             grasslist.erase(it.G);
             delete it.G;
@@ -326,7 +330,7 @@ void mysystem::Hang_out(Creature* x){
             vecx=iter->getLoc().real() - xx->getLoc().real();
             vecy=iter->getLoc().imag() - xx->getLoc().imag();
             if(vecx>-20&&vecx<=20 && -20<=vecy && vecy<=20){
-                if(rand()%15<2 && xx->getenergy()>=xx->energy_threshhold && iter->getenergy()>=iter->energy_threshhold && xx->sex^iter->sex && cnt-xx->getage()>xx->matingage && cnt-iter->getage()>iter->matingage){
+                if(rand()%15<2 && xx->getenergy()>=xx->energy_threshhold2 && iter->getenergy()>=iter->energy_threshhold2 && xx->sex^iter->sex && cnt-xx->getage()>xx->matingage && cnt-iter->getage()>iter->matingage){
                     if(iter->sex==0) iter->ispregnant=1;
                     else xx->ispregnant=1;
                     tigerlist.insert(new Tiger(xx->getenergy()/3,iter->getLoc().real(),iter->getLoc().imag(),rand()%2,cnt));
@@ -377,8 +381,8 @@ void mysystem::Hang_out(Creature* x){
             vecx=iter->getLoc().real() - xx->getLoc().real();
             vecy=iter->getLoc().imag() - xx->getLoc().imag();
             if(vecx>-20&&vecx<=20 && -20<=vecy && vecy<=20){
-                if(rand()%15<2 && xx->getenergy()>=xx->energy_threshhold
-                        && iter->getenergy()>=iter->energy_threshhold && xx->sex^iter->sex &&
+                if(rand()%15<2 && xx->getenergy()>=xx->energy_threshhold2
+                        && iter->getenergy()>=iter->energy_threshhold2 && xx->sex^iter->sex &&
                         cnt-xx->getage()>xx->matingage && cnt-iter->getage()>iter->matingage){
                     cowlist.insert(new Cow(xx->getenergy()/3,iter->getLoc().real(),iter->getLoc().imag(),rand()%2,cnt));
                     iter->lastgen=xx->lastgen=cnt;

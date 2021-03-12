@@ -25,8 +25,9 @@ double mammal::getspeed() {
     return 0;
 }
 bool mammal::ishungry(){
-    if (getenergy()>energy_threshhold) return 0;
-    else return 1;
+    if (energy>energy_threshhold2) eflag=0;
+    if (energy<energy_threshhold) eflag=1;
+    return eflag;
 }
 
 void mammal::energyloss(double cost) {
