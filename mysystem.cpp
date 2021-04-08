@@ -11,7 +11,7 @@ mysystem::mysystem(QWidget *parent)
         updatesystem();
         update();
     });
-    timer->start(1000/24);
+    timer->start(1000/60);
 }
 mysystem::~mysystem(){
 }
@@ -355,9 +355,12 @@ void mysystem::Hang_out(Creature* x){
             vecy=iter->getLoc().imag() - xx->getLoc().imag();
             if(vecx>-20&&vecx<=20 && -20<=vecy && vecy<=20){
                 if(rand()%15<2 && xx->getenergy()>=xx->energy_threshhold2 && iter->getenergy()>=iter->energy_threshhold2 && xx->sex^iter->sex && cnt-xx->getage()>xx->matingage && cnt-iter->getage()>iter->matingage){
-                    if(iter->sex==0) iter->ispregnant=1;
-                    else xx->ispregnant=1;
-                    tigerlist.insert(new Tiger(xx->getenergy()/3,iter->getLoc().real(),iter->getLoc().imag(),rand()%2,cnt));
+                    iter->mate=xx;
+                    xx->mate=iter;
+                    Tiger* babe = new Tiger(xx->getenergy()/3,iter->getLoc().real(),iter->getLoc().imag(),rand()%2,cnt);
+                    tigerlist.insert(babe);
+                    if(iter->sex==0) iter->childlist.push_back(babe);
+                    else xx->childlist.push_back(babe);
                     iter->lastgen=xx->lastgen=cnt;
                     xx->energyloss(xx->getenergy()/3);
                     iter->energyloss(iter->getenergy()/3);
