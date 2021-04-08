@@ -11,10 +11,11 @@ mammal::mammal(double energy_, double x, double y,bool sexx,int born_datee)
     setVel(speed*exp(std::complex<double>(0, (double)rand()/RAND_MAX*M_PI*2)));
     sex= sexx;//新加的
     born_date=born_datee;//新加的
-    matingage=400;
+    matingage=4000;
     energy_threshhold=1000;
     energy_threshhold2=1600;
     lastgen=0;
+    death=false;
 }
 
 mammal::~mammal(){

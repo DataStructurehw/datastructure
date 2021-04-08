@@ -1,35 +1,38 @@
 #include "mysystem.h"
-#include <QPainter>
-#include <QPainterPath>
-#include <QDebug>
-#include <QTimer>
-#include <stdlib.h>
-#include<queue>
-#include <time.h>
-#include<complex>
-
-int cnt=0,tigernumber=0;
+bool got_sleep=0;
 mysystem::mysystem(QWidget *parent)
     :QWidget(parent)
 {
     srand(time(NULL));
     this->setGeo(800,600);
     initSystem();
-    QTimer *timer= new QTimer(this);
+    timer= new QTimer(this);
     connect(timer,&QTimer::timeout,this,[=]{
         updatesystem();
         update();
     });
-    timer->start(1000/60);
+    timer->start(1000/24);
 }
 mysystem::~mysystem(){
 }
 
 void mysystem::paintEvent(QPaintEvent *event){
     Q_UNUSED(event)
-    QPainter painter(this);
+    QPixmap pixmap(size());
+    QPainter painter(&pixmap);
+    painter.setRenderHints(QPainter::HighQualityAntialiasing
+                         | QPainter::Antialiasing
+                         | QPainter::TextAntialiasing, true);
     painter.fillRect(this->rect(),Qt::white);
     drawsystem(&painter);
+    painter.end();
+    painter.begin(this);
+    painter.drawPixmap(0,0,pixmap);
+}
+double mysystem::ld_delay(double x){
+    if (x>1) return 1;
+    if (x<0) return 0;
+    return x;
 }
 
 void mysystem::initSystem(){
@@ -54,6 +57,13 @@ void mysystem::initSystem(){
 }
 
 void mysystem::drawsystem(QPainter *painter){
+
+//    QLinearGradient Linear(100,120,300,350);
+//    Linear.setColorAt(0,Qt::darkGray);
+//    Linear.setColorAt(1,Qt::white);
+//    painter->setPen(Qt::transparent);
+//    painter->setBrush(Qt::darkGray);
+//    painter->drawRect(0,0,800,600);
     for(Grass* iter:grasslist){
         painter->setBrush(iter->owncolor);
         painter->drawEllipse(QPointF(iter->getLoc().real(), iter->getLoc().imag()),2,2);
@@ -86,6 +96,12 @@ void mysystem::drawsystem(QPainter *painter){
         else
         painter->drawEllipse(QPointF(iter->getLoc().real(), iter->getLoc().imag()),2,2);
     }
+    painter->setBrush(QColor(128, 128, 128, 150*ld_delay(sin(cnt*3.14159/(daylong/2))+1/3)));
+    if(cnt%daylong==50||cnt%daylong==(daylong/2)-50) emit go_to_sleep();
+//    qDebug()<<cnt<<abs(sin(cnt*3.14159/600))<<150*ld_delay(sin(cnt*3.14159/600)+1/3);
+    painter->setPen(Qt::transparent);
+    painter->drawRect(0,0,800,600);
+
 }
 
 struct Node { // Tiger A will hunt cow B
@@ -133,7 +149,7 @@ void mysystem::matchCG() {
     while (!pque.empty()) pque.pop();
     matchedC.clear(); matchedG.clear();
     eatList.clear();
-    int safeRad = 100;
+    int safeRad = 50;
     for (Cow* it: cowlist)
         if (!it->getstate() && it->ishungry()) {// condition hungry and condition safe  (it->ishungry())
             for (Grass* itG: grasslist) {
@@ -165,11 +181,18 @@ void updateFreeWalk(Creature *it) {
     int tmp1=1,tmp2=1;
     if (it->getLoc().real()+it->getVel().real()<0 || it->getLoc().real()+it->getVel().real()>800) tmp1=-1;
     if (it->getLoc().imag()+it->getVel().imag()<0 || it->getLoc().imag()+it->getVel().imag()>600) tmp2=-1;
-    it->setVel(tmp1*it->getVel().real(),tmp2*it->getVel().imag());
+    else {
+        if (abs(it->getVel())<0.1){
+            double speed=1;
+            it->setVel(speed*exp(std::complex<double>(0, (double)rand()/RAND_MAX*M_PI*2)));
+        }
+        it->setVel(tmp1*it->getVel().real(),tmp2*it->getVel().imag());
+    }
     it->setLoc(it->getLoc()+it->getVel()*RunTime);
 }
 
 void mysystem::freeWalk() { // cow and tiger would like free walking if they are not hunting or escaping.
+
     for (Cow *it: cowlist) if (it->getenergy() > engThresh) {
         bool flag = true;
         for (Tiger *pred: tigerlist)
@@ -203,6 +226,10 @@ void escape() { // update the cows in esclist
         double speed = abs(it.first->getVel());
         complex<double> dir = it.second/abs(it.second);
         it.first->setVel(speed*dir);
+        int tmp1=1,tmp2=1;
+        if (it.first->getLoc().real()+it.first->getVel().real()<0 || it.first->getLoc().real()+it.first->getVel().real()>800) tmp1=-1;
+        if (it.first->getLoc().imag()+it.first->getVel().imag()<0 || it.first->getLoc().imag()+it.first->getVel().imag()>600) tmp2=-1;
+        it.first->setVel(tmp1*it.first->getVel().real(),tmp2*it.first->getVel().imag());
         it.first->setLoc(it.first->getLoc()+dir*min(cSpedMax, speed+tB*RunTime)*RunTime);
     }
 }
@@ -249,7 +276,10 @@ void mysystem::match() { // clarify the relationship between the creature
                 tmp += (it->getLoc()-pred->getLoc())/dis/dis;
             }
         }
-        if (flag) continue;
+        if (flag) {
+            it->setstate(0);
+            continue;
+        }
         it->setstate(1);
         // the cow may choose a "vague" direction to run
         esclist.push_back(make_pair(it, tmp*exp(I*(Theta*rand()/RAND_MAX*2-Theta))));
@@ -269,18 +299,28 @@ void mysystem::updateEnergy() {
 
     }
     for (Grass *it: grasslist)
+        it->energyloss(-0.1);
+}
+void mysystem::sleep_energy(){
+    for (Cow *it: cowlist)
+        it->energyloss(300/(daylong*0.33));
+    for (Tiger *it: tigerlist) {
+        it->energyloss(300/(daylong*0.33));
+
+    }
+    for (Grass *it: grasslist)
         it->energyloss(0.1);
 }
 
 void mysystem::takeFood() {
     for (auto it: eatList)
-        if (abs(it.C->getLoc()-it.G->getLoc()) < eps*3) {
+        if (abs(it.C->getLoc()-it.G->getLoc()) < eps*4) {
             it.C->energyloss(-it.G->getenergy()*0.9);
             grasslist.erase(it.G);
             delete it.G;
         }
     for (auto it: huntlist)
-        if (abs(it.A->getLoc()-it.B->getLoc()) < eps) {
+        if (abs(it.A->getLoc()-it.B->getLoc()) < eps*4) {
             it.A->energyloss(-it.B->getenergy()*0.8);
             cowlist.erase(it.B);
             delete it.B;
@@ -306,7 +346,6 @@ void mysystem::clearDeath() {
 }
 
 void mysystem::Hang_out(Creature* x){
-
     if(typeid(*x).name()==typeid(Tiger).name()){
         Tiger* xx=dynamic_cast<Tiger*>(x);
         double vecx=0,vecy=0,svecx=0,svecy=0;
@@ -319,7 +358,6 @@ void mysystem::Hang_out(Creature* x){
                     if(iter->sex==0) iter->ispregnant=1;
                     else xx->ispregnant=1;
                     tigerlist.insert(new Tiger(xx->getenergy()/3,iter->getLoc().real(),iter->getLoc().imag(),rand()%2,cnt));
-                    tigernumber++;
                     iter->lastgen=xx->lastgen=cnt;
                     xx->energyloss(xx->getenergy()/3);
                     iter->energyloss(iter->getenergy()/3);
@@ -356,8 +394,22 @@ void mysystem::Hang_out(Creature* x){
             else xx->change_time=30+rand()%10;
         }
         else xx->change_time--;
-        xx->setLoc(xx->getLoc().real()+xx->now_vecx,xx->getLoc().imag()+xx->now_vecy);
-
+        complex<double> tmp1=xx->getVel();
+        complex<double> tmp2(xx->now_vecx,xx->now_vecy);
+        double tmp3=(tmp1.real()*tmp2.real()+tmp1.imag()*tmp2.imag())/abs(tmp1)/abs(tmp2);
+        if (tmp3>1) tmp3=0.99;
+        if (tmp3<-1) tmp3=-0.99;
+        double the1=acos(tmp3);
+        if (abs(the1)>Theta){
+            if (the1>0)
+            xx->setVel(xx->getVel()*exp((Theta)*I));
+            else
+            xx->setVel(xx->getVel()*exp((-Theta)*I));
+        }
+        else{
+            xx->setVel(xx->getVel()*exp((the1)*I));
+        }
+        xx->setLoc(xx->getLoc()+xx->getVel()*RunTime);
     }
     else if(typeid(*x).name()==typeid(Cow).name()){
         double vecx=0,vecy=0,svecx=0,svecy=0;
@@ -388,8 +440,13 @@ void mysystem::normalize(double &x, double &y){
     y=y/sqrt(x*x+y*y);
     x=tmp;
 }
+
 void mysystem::updatesystem(){
     cnt++;
+    if(got_sleep==1){
+        sleep_energy();
+        return;
+    }
     match();
     for (auto it: huntlist) hunt(it.A, it.B);
     escape();
@@ -406,3 +463,8 @@ void mysystem::updatesystem(){
     freeWalk();
     updateEnergy();
 }
+void mysystem::get_sleep(){
+    got_sleep=!got_sleep;
+    qDebug()<<got_sleep;
+}
+
