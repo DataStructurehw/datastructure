@@ -13,7 +13,86 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
-  <widget class="mysystem" name="centralWidget"/>
+  <widget class="mysystem" name="centralWidget">
+   <widget class="QPushButton" name="addgrass">
+    <property name="geometry">
+     <rect>
+      <x>50</x>
+      <y>90</y>
+      <width>101</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>addgrass</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="addcow">
+    <property name="geometry">
+     <rect>
+      <x>50</x>
+      <y>140</y>
+      <width>101</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>addcow</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="addtiger">
+    <property name="geometry">
+     <rect>
+      <x>50</x>
+      <y>190</y>
+      <width>101</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>addtiger</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="stoptime">
+    <property name="geometry">
+     <rect>
+      <x>50</x>
+      <y>230</y>
+      <width>101</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>stoptime</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="retime">
+    <property name="geometry">
+     <rect>
+      <x>50</x>
+      <y>270</y>
+      <width>101</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>retime</string>
+    </property>
+   </widget>
+   <widget class="QSlider" name="speedcontrol">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>50</y>
+      <width>160</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+   </widget>
+  </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -22,8 +101,131 @@
    <extends>QWidget</extends>
    <header location="global">mysystem.h</header>
    <container>1</container>
+   <slots>
+    <signal>go_to_sleep()</signal>
+    <slot>get_sleep()</slot>
+    <slot>addcow()</slot>
+    <slot>addtiger()</slot>
+    <slot>addgrass()</slot>
+    <slot>retime()</slot>
+    <slot>stoptime()</slot>
+    <slot>change_speed(int)</slot>
+   </slots>
   </customwidget>
  </customwidgets>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>centralWidget</sender>
+   <signal>go_to_sleep()</signal>
+   <receiver>centralWidget</receiver>
+   <slot>get_sleep()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>293</x>
+     <y>217</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>293</x>
+     <y>217</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>stoptime</sender>
+   <signal>clicked()</signal>
+   <receiver>centralWidget</receiver>
+   <slot>stoptime()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>100</x>
+     <y>250</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>293</x>
+     <y>217</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>retime</sender>
+   <signal>clicked()</signal>
+   <receiver>centralWidget</receiver>
+   <slot>retime()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>100</x>
+     <y>290</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>293</x>
+     <y>217</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>addcow</sender>
+   <signal>clicked()</signal>
+   <receiver>centralWidget</receiver>
+   <slot>addcow()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>100</x>
+     <y>160</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>293</x>
+     <y>217</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>addtiger</sender>
+   <signal>clicked()</signal>
+   <receiver>centralWidget</receiver>
+   <slot>addtiger()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>100</x>
+     <y>210</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>293</x>
+     <y>217</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>addgrass</sender>
+   <signal>clicked()</signal>
+   <receiver>centralWidget</receiver>
+   <slot>addgrass()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>100</x>
+     <y>110</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>293</x>
+     <y>217</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>speedcontrol</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>centralWidget</receiver>
+   <slot>change_speed(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>109</x>
+     <y>60</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>293</x>
+     <y>217</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
