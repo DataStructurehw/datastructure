@@ -1,2 +1,4 @@
 # datastructure
-调参中，白天黑夜，天气的计划还未开始
+- 新增 motherCheck 和 motherFetch 函数
+- 相应修改了其他函数
+- state == 3 代表与此次更新相关的操作
