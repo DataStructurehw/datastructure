@@ -1,5 +1,8 @@
 #include "creature.h"
 
+Creature::~Creature(){
+
+}
 double Creature::getenergy() { return energy; }
 std::complex<double> Creature::getLoc() { return loc; }
 std::complex<double> Creature::getVel() { return vel; }

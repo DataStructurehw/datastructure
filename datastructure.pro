@@ -24,13 +24,14 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += \
-    creature.cpp \
         main.cpp \
         mainwindow.cpp \
     mysystem.cpp \
     cow.cpp \
     tiger.cpp \
-    grass.cpp
+    grass.cpp \
+    mammal.cpp \
+    creature.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -38,7 +39,8 @@ HEADERS += \
     cow.h \
     creature.h \
     grass.h \
-    tiger.h
+    tiger.h \
+    mammal.h
 
 
 

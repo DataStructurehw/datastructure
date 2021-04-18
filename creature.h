@@ -1,30 +1,31 @@
-//first version of class creature (prototype
+﻿//first version of class creature (prototype
 //2021/1/18
 
 #ifndef CREATURE_H
 #define CREATURE_H
 
 #include <complex>
-
+#define M_PI 3.14
+#define M_PI_2 3.14 / 2
 class Creature {
 public:
-        double getspeed();//every species has its own random speed
+        virtual double getspeed() = 0;//every species has its own random speed
         virtual void energyloss(double) = 0;//how we define the energy loss, using speed or else?
         virtual bool ishungry() = 0;
-        double getprobability();
-        double getenergy();
+        virtual ~Creature();
         std::complex<double> getLoc();
         std::complex<double> getVel();
+        double getprobability();
+        double getenergy();
         void setLoc(std::complex<double>);
         void setLoc(double, double);
         void setVel(std::complex<double>);
         void setVel(double, double);
-
-protected:
         double energy;
-        bool hungry;
-        std::complex<double> loc, vel; // location, velocity
-        double probability;//probability of dying
+        double coordinatex;
+        double coordinatey;
+        std::complex<double> loc, vel;
+        double probability;
        //double life_span() whether we build in class or realize it by calculating on energy
 };
 #endif // CREATURE_H

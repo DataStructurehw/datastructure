@@ -22,8 +22,29 @@
    <extends>QWidget</extends>
    <header location="global">mysystem.h</header>
    <container>1</container>
+   <slots>
+    <signal>go_to_sleep()</signal>
+    <slot>get_sleep()</slot>
+   </slots>
   </customwidget>
  </customwidgets>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>centralWidget</sender>
+   <signal>go_to_sleep()</signal>
+   <receiver>centralWidget</receiver>
+   <slot>get_sleep()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>293</x>
+     <y>217</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>293</x>
+     <y>217</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

@@ -1,4 +1,4 @@
-#ifndef mysystem_H
+﻿#ifndef mysystem_H
 #define mysystem_H
 
 #include <QWidget>
@@ -7,32 +7,17 @@
 #include "grass.h"
 #include "tiger.h"
 #include <set>
+#include <QPainter>
+#include <QPainterPath>
+#include <QDebug>
+#include <QTimer>
+#include <QPixmap>
+#include <stdlib.h>
+#include<queue>
+#include <time.h>
+#include<complex>
+#include<cmath>
 using namespace std;
-
-class testcreature{
-public:
-    testcreature(QColor c,double xx,double yy):owncolor(c),x(xx),y(yy){
-
-    }
-    ~testcreature(){
-
-    }
-    QColor getcolor(){
-        return owncolor;
-    }
-    double getx(){
-        return x;
-    }
-    double gety(){
-        return y;
-    }
-
-
-private:
-    QColor owncolor;
-    int x,y;
-};
-
 class mysystem: public QWidget
 {
     Q_OBJECT
@@ -48,29 +33,40 @@ public:
     }
     explicit mysystem(QWidget *parent = nullptr);
     ~mysystem();
+    QTimer *timer;
+    int cnt=0;
+    int daylong=1200;
+    void normalize(double &, double &);
+    complex<double> normalize(complex<double>);
 protected:
     void paintEvent(QPaintEvent *event) override;
 
 private:
-    //intial mysystem,这里写process
     void initSystem();
-    //递归绘制
     void drawsystem(QPainter *painter);
-    //更新系统，这里写process
     void updatesystem();
+    void sleep_energy();
+    void Hang_out(Creature*);
     void match();
-    void matchGT();
     void matchCG();
     void freeWalk();
     void takeFood();
     void clearDeath();
+    double ld_delay(double);
     void updateEnergy();
-    QList<testcreature*> creaturelist;
-    std::set<Tiger*> tigerlist;
-    std::set<Cow*> cowlist;
-    std::set<Grass*> grasslist;
-    double w;//窗体宽度
-    double h;//窗体高度
+    void motherCheck();
+    void motherFetch();
+    set<Tiger*> tigerlist;
+    set<Cow*> cowlist;
+    set<Grass*> grasslist;
+    double w;
+    double h;
+
+    bool day_or_night;
+signals:
+    void go_to_sleep();
+public slots:
+    void get_sleep();
 };
 
 
