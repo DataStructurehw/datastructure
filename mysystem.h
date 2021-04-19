@@ -42,6 +42,8 @@ protected:
     void paintEvent(QPaintEvent *event) override;
 
 private:
+    QPointF m_nowPoint;
+    QPointF m_lastPoint;
     void initSystem();
     void drawsystem(QPainter *painter);
     void updatesystem();

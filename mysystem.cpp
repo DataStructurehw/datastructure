@@ -1,5 +1,6 @@
 ﻿#include "mysystem.h"
 bool got_sleep=0;
+int map_w=1600,map_h=1200;
 mysystem::mysystem(QWidget *parent)
     :QWidget(parent)
 {
@@ -18,16 +19,20 @@ mysystem::~mysystem(){
 
 void mysystem::paintEvent(QPaintEvent *event){
     Q_UNUSED(event)
-    QPixmap pixmap(size());
+    QPixmap pixmap(size()*2);
+
     QPainter painter(&pixmap);
     painter.setRenderHints(QPainter::HighQualityAntialiasing
                          | QPainter::Antialiasing
                          | QPainter::TextAntialiasing, true);
-    painter.fillRect(this->rect(),Qt::white);
+    painter.fillRect(pixmap.rect(),Qt::white);
     drawsystem(&painter);
     painter.end();
     painter.begin(this);
-    painter.drawPixmap(0,0,pixmap);
+    qDebug()<<pixmap.size();
+    painter.scale(0.5,0.5);
+//    qDebug()<<this->size();
+    painter.drawPixmap(-300,-300,pixmap);
 }
 double mysystem::ld_delay(double x){
     if (x>1) return 1;
@@ -39,11 +44,11 @@ void mysystem::initSystem(){
     const int numGrass = 300, numGroupCow = 6, numCowPerG = 20, numTiger = 5;//
     for (int i = 0; i < numGrass; ++i)
         grasslist.insert(new Grass(1000,
-                            rand()/double(RAND_MAX)*this->width(),
-                            rand()/double(RAND_MAX)*this->height(),10,10,cnt));
+                            rand()/double(RAND_MAX)*map_w,
+                            rand()/double(RAND_MAX)*map_h,10,10,cnt));
     for (int i = 0; i < numGroupCow; ++i) {
-        double centerx = rand()/double(RAND_MAX)*this->width(),
-                centery = rand()/double(RAND_MAX)*this->height();
+        double centerx = rand()/double(RAND_MAX)*map_w,
+                centery = rand()/double(RAND_MAX)*map_h;
         const double limx = 10, limy = 10;
         for (int j = 0; j < rand()%numCowPerG; ++j)
             cowlist.insert(new Cow(2000,rand()/double(RAND_MAX)*limx-limx/2+centerx,
@@ -51,8 +56,8 @@ void mysystem::initSystem(){
     }
     for (int i = 0; i < numTiger; ++i){
         int tmp = rand()%2;
-        tigerlist.insert(new Tiger(2000,rand()/double(RAND_MAX)*(this->width()-200)+100,
-                                      rand()/double(RAND_MAX)*(this->height()-200)+100,tmp,cnt));
+        tigerlist.insert(new Tiger(2000,rand()/double(RAND_MAX)*(map_w-200)+100,
+                                      rand()/double(RAND_MAX)*(map_h-200)+100,tmp,cnt));
     }
 }
 
@@ -100,7 +105,7 @@ void mysystem::drawsystem(QPainter *painter){
     if(cnt%daylong==50||cnt%daylong==(daylong/2)-50) emit go_to_sleep();
 //    qDebug()<<cnt<<abs(sin(cnt*3.14159/600))<<150*ld_delay(sin(cnt*3.14159/600)+1/3);
     painter->setPen(Qt::transparent);
-    painter->drawRect(0,0,800,600);
+    painter->drawRect(0,0,1600,1200);
 
 }
 
